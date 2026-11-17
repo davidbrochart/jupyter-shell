@@ -1,0 +1,42 @@
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14"]
+build-backend = "uv_build"
+
+[project]
+name = "jupyter-shell"
+version = "0.1.0"
+description = "An Anyshell terminal plugin for Jupyverse"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "anyio>=4.11,<5",
+    "anyshell[anytext]>=0.4",
+    "anytext>=9.3",
+    "fastapi>=0.115",
+    "fps>=0.6",
+    "jupyverse-api>=0.15,<0.16",
+    "jupyverse-auth>=0.2,<0.3",
+    "jupyverse-terminals>=0.2,<0.3",
+    "libghostty-py>=0.3,<0.4",
+]
+
+[project.entry-points."fps.modules"]
+shell = "jupyter_shell.main:ShellModule"
+
+[project.entry-points."jupyverse.modules"]
+shell = "jupyter_shell.main:ShellModule"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-timeout>=2.4", "trio>=0.32", "httpx2>=2.0.0a4", "ruff>=0.14"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+timeout = 45
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

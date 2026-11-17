@@ -1,0 +1,54 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.13.5"
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --locked --group dev
+      - name: Run tests
+        run: uv run --locked pytest -v --color=yes
+
+  check:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.13.5"
+          python-version: "3.13"
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --locked --group dev
+      - name: Lint
+        run: uv run --locked ruff check .
+      - name: Check formatting
+        run: uv run --locked ruff format --check .
+      - name: Build distributions
+        run: uv build --no-sources
